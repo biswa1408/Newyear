@@ -1,0 +1,984 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>A Little Surprise</title>
+    <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;600&family=Nunito:wght@400;700&display=swap"
+        rel="stylesheet">
+
+    <style>
+        /* --- RESET & BASICS --- */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            user-select: none;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        :root {
+            --bg-dark: #0f0518;
+            --bg-card: #1f1128;
+            --primary: #ff66c4;
+            --accent-yellow: #f9d56e;
+            --accent-blue: #6eb5f9;
+            --text-light: #f0e6f5;
+            --text-dim: #a690b0;
+        }
+
+        body {
+            background-color: var(--bg-dark);
+            /* Subtle radial gradient background */
+            background-image:
+                radial-gradient(circle at 10% 20%, rgba(120, 20, 150, 0.15) 0%, transparent 20%),
+                radial-gradient(circle at 90% 80%, rgba(255, 102, 196, 0.1) 0%, transparent 20%);
+            color: var(--text-light);
+            font-family: 'Nunito', sans-serif;
+            height: 100vh;
+            width: 100vw;
+            overflow: hidden;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            position: relative;
+        }
+
+        /* --- BACKGROUND STARS ANIMATION --- */
+        .stars {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 0;
+            pointer-events: none;
+        }
+
+        .star {
+            position: absolute;
+            background: white;
+            border-radius: 50%;
+            opacity: 0;
+            animation: twinkle var(--duration) ease-in-out infinite;
+            animation-delay: var(--delay);
+        }
+
+        @keyframes twinkle {
+
+            0%,
+            100% {
+                opacity: 0;
+                transform: scale(0.2);
+            }
+
+            50% {
+                opacity: var(--opacity);
+                transform: scale(1);
+            }
+        }
+
+        /* --- STAGE MANAGEMENT --- */
+        .container {
+            width: 100%;
+            max-width: 450px;
+            /* Mobile width constraint */
+            height: 100%;
+            position: relative;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 10;
+        }
+
+        .stage {
+            position: absolute;
+            gap: 18px;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            pointer-events: none;
+            transform: scale(0.95);
+            transition: all 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+
+        .stage.active {
+            opacity: 1;
+            pointer-events: auto;
+            transform: scale(1);
+        }
+
+        .stage.hidden {
+            opacity: 0;
+            transform: scale(1.1);
+            pointer-events: none;
+        }
+
+        h1 {
+            font-family: 'Fredoka', sans-serif;
+            font-size: 1.8rem;
+            text-align: center;
+            margin-bottom: 0.5rem;
+            padding: 0 20px;
+        }
+
+        .subtitle {
+            color: var(--text-dim);
+            font-size: 0.95rem;
+            text-align: center;
+            margin-bottom: 2.5rem;
+        }
+
+        /* --- STAGE 1: TAP & HOLD --- */
+        .heart-box {
+            /* background: var(--bg-card); */
+            width: 260px;
+            /* height: 260px; */
+            border-radius: 24px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            /* box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3); */
+            cursor: pointer;
+            transition: transform 0.1s;
+        }
+
+        .heart-box:active {
+            transform: scale(0.98);
+        }
+
+        /* Circular Progress SVG */
+        .progress-ring {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%) rotate(-90deg);
+            width: 140px;
+            height: 140px;
+        }
+
+        .progress-ring circle {
+            fill: transparent;
+            stroke-width: 6;
+            r: 60;
+            cx: 70;
+            cy: 70;
+            stroke-linecap: round;
+        }
+
+        .ring-bg {
+            stroke: rgba(255, 255, 255, 0.1);
+        }
+
+        .ring-fill {
+            stroke: var(--primary);
+            stroke-dasharray: 377;
+            /* 2 * PI * 60 */
+            stroke-dashoffset: 377;
+            transition: stroke-dashoffset 0.05s linear;
+        }
+
+        .heart-icon {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+
+        /* Style the SVG specifically */
+        .heart-icon svg {
+            width: 70px;
+            /* Sets the size of the heart */
+            height: 70px;
+            fill: var(--primary);
+            /* Uses your pink color variable */
+            filter: drop-shadow(0 0 5px rgba(255, 102, 196, 0.5));
+            /* Adds a nice glow */
+        }
+
+        .pulse-anim {
+            animation: pulse 1.5s infinite;
+        }
+
+        @keyframes pulse {
+            0% {
+                transform: scale(1);
+            }
+
+            50% {
+                transform: scale(1.1);
+            }
+
+            100% {
+                transform: scale(1);
+            }
+        }
+
+        .instruction {
+            margin-top: 50px;
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            color: var(--text-dim);
+        }
+
+        /* --- STAGE 2: DISTRACTIONS --- */
+        .cards-area {
+            position: relative;
+            width: 300px;
+            height: 300px;
+            margin-bottom: 30px;
+        }
+
+        .distraction-card {
+            position: absolute;
+            width: 130px;
+            height: 170px;
+            border-radius: 12px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            font-family: 'Fredoka', sans-serif;
+            font-size: 1.1rem;
+            color: #333;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+
+            /* Centered initially */
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%) rotate(var(--r));
+
+            /* Smooth movement animation */
+            transition: transform 0.8s cubic-bezier(0.2, 0.8, 0.2, 1);
+            cursor: pointer;
+            z-index: 2;
+        }
+
+        .d-icon {
+            font-size: 2.5rem;
+            margin-bottom: 8px;
+        }
+
+        /* Initial Positions */
+        .c1 {
+            background: #ffeaa7;
+            --r: -6deg;
+            z-index: 5;
+        }
+
+        /* Yellow */
+        .c2 {
+            background: #74b9ff;
+            --r: 8deg;
+            z-index: 4;
+        }
+
+        /* Blue */
+        .c3 {
+            background: #ff7675;
+            --r: -12deg;
+            z-index: 3;
+        }
+
+        /* Red */
+        .c4 {
+            background: #fab1a0;
+            --r: 4deg;
+            z-index: 2;
+        }
+
+        /* Orange */
+
+        /* "Fly" states - triggered individually 
+   We removed 'opacity: 0' so they stay visible.
+   We use pointer-events: none so you can click the gift underneath.
+*/
+
+        /* Top Left */
+        .c1.fly {
+            transform: translate(-140%, -120%) rotate(-15deg);
+            pointer-events: none;
+        }
+
+        /* Top Right */
+        .c2.fly {
+            transform: translate(40%, -120%) rotate(10deg);
+            pointer-events: none;
+        }
+
+        /* Bottom Left */
+        .c3.fly {
+            transform: translate(-140%, 30%) rotate(-10deg);
+            pointer-events: none;
+        }
+
+        /* Bottom Right */
+        .c4.fly {
+            transform: translate(40%, 30%) rotate(5deg);
+            pointer-events: none;
+        }
+
+        .gift {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%) scale(0.8);
+            width: 80px;
+            height: 80px;
+            background: linear-gradient(135deg, #e056fd, #be2edd);
+            border-radius: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2.5rem;
+            color: white;
+            box-shadow: 0 0 30px rgba(224, 86, 253, 0.6);
+            z-index: 1;
+            /* Below cards initially */
+            transition: all 0.5s ease;
+            cursor: pointer;
+            pointer-events: none;
+        }
+
+        /* Active gift state */
+        .gift.active {
+            transform: translate(-50%, -50%) scale(1.1);
+            animation: giftPulse 2s infinite;
+            pointer-events: auto;
+            /* Now clickable */
+            z-index: 10;
+            /* Bring to front */
+        }
+
+        @keyframes giftPulse {
+            0% {
+                box-shadow: 0 0 30px rgba(224, 86, 253, 0.6);
+            }
+
+            50% {
+                box-shadow: 0 0 50px rgba(224, 86, 253, 0.9);
+            }
+
+            100% {
+                box-shadow: 0 0 30px rgba(224, 86, 253, 0.6);
+            }
+        }
+
+        /* --- STAGE 3: GOLDEN TICKET --- */
+        .ticket-wrapper {
+            perspective: 1000px;
+            cursor: pointer;
+        }
+
+        .golden-ticket {
+            width: 320px;
+            height: 190px;
+            background: linear-gradient(135deg, #333, #000);
+            border: 2px solid #ffd700;
+            border-radius: 16px;
+            position: relative;
+            padding: 20px;
+            text-align: center;
+            box-shadow: 0 0 25px rgba(255, 215, 0, 0.2);
+            animation: float 3s ease-in-out infinite;
+            overflow: hidden;
+        }
+
+        /* Shine effect */
+        .golden-ticket::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -150%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 215, 0, 0.2), transparent);
+            transform: skewX(-20deg);
+            animation: shine 3s infinite;
+        }
+
+        @keyframes shine {
+            0% {
+                left: -150%;
+            }
+
+            50% {
+                left: 150%;
+            }
+
+            100% {
+                left: 150%;
+            }
+        }
+
+        @keyframes float {
+
+            0%,
+            100% {
+                transform: translateY(0);
+            }
+
+            50% {
+                transform: translateY(-10px);
+            }
+        }
+
+        .t-title {
+            color: #ffd700;
+            font-family: 'Fredoka', sans-serif;
+            font-size: 1.4rem;
+            letter-spacing: 1px;
+        }
+
+        .t-sub {
+            color: #888;
+            font-size: 0.7rem;
+            text-transform: uppercase;
+            margin-bottom: 20px;
+            border-bottom: 1px solid #444;
+            padding-bottom: 5px;
+            display: inline-block;
+        }
+
+        .t-msg {
+            color: var(--primary);
+            font-family: 'Fredoka', sans-serif;
+            font-size: 1.2rem;
+            margin-bottom: 25px;
+        }
+
+        .t-footer {
+            color: #555;
+            font-size: 0.6rem;
+            margin-top: auto;
+        }
+
+        .btn-claim {
+            margin-top: 40px;
+            background: transparent;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            color: #fff;
+            padding: 12px 30px;
+            border-radius: 50px;
+            font-size: 0.9rem;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+
+        .btn-claim:hover {
+            background: rgba(255, 255, 255, 0.1);
+            border-color: #fff;
+        }
+
+        /* --- STAGE 4: PHOTOS --- */
+        .photo-stack {
+            position: relative;
+            width: 260px;
+            height: 340px;
+        }
+
+        .polaroid {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: #fff;
+            padding: 12px 12px 50px 12px;
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+            border-radius: 4px;
+            transform-origin: 50% 100%;
+            transition: transform 0.6s ease, opacity 0.6s ease;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .polaroid img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            border-radius: 2px;
+            background: #eee;
+        }
+
+        /* Stack rotations */
+        .p3 {
+            z-index: 3;
+            transform: rotate(-2deg);
+        }
+
+        .p2 {
+            z-index: 2;
+            transform: rotate(3deg);
+        }
+
+        .p1 {
+            z-index: 1;
+            transform: rotate(-4deg);
+        }
+
+        .fly-off {
+            transform: translate(150px, -100px) rotate(20deg);
+            opacity: 0;
+        }
+
+        .tap-hint {
+            position: absolute;
+            bottom: -40px;
+            width: 100%;
+            text-align: center;
+            color: var(--text-dim);
+            font-size: 0.8rem;
+            animation: fadeInOut 2s infinite;
+        }
+
+        @keyframes fadeInOut {
+
+            0%,
+            100% {
+                opacity: 0.4;
+            }
+
+            50% {
+                opacity: 1;
+            }
+        }
+
+        /* --- STAGE 5: GREETING CARD --- */
+        .book-wrap {
+            width: 300px;
+            height: 420px;
+            position: relative;
+            perspective: 1500px;
+        }
+
+        .book-cover {
+            width: 100%;
+            height: 100%;
+            position: absolute;
+            top: 0;
+            left: 0;
+            transform-style: preserve-3d;
+            transform-origin: left;
+            transition: transform 1.2s cubic-bezier(0.4, 0, 0.2, 1);
+            z-index: 2;
+        }
+
+        .book-wrap.open .book-cover {
+            transform: rotateY(-180deg);
+        }
+
+        /* The front of the card (Cover) */
+        .front-face {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            backface-visibility: hidden;
+            background: #fff;
+            border-radius: 12px 4px 4px 12px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            box-shadow: inset 5px 0 10px rgba(0, 0, 0, 0.05), 5px 5px 15px rgba(0, 0, 0, 0.2);
+            z-index: 2;
+        }
+
+        /* The back of the cover (Inside Left) */
+        .back-face {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            backface-visibility: hidden;
+            background: #fffaf0;
+            border-radius: 4px 12px 12px 4px;
+            transform: rotateY(180deg);
+            padding: 30px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            text-align: left;
+            box-shadow: inset -5px 0 10px rgba(0, 0, 0, 0.05);
+            font-size: 0.95rem;
+            color: #555;
+            line-height: 1.6;
+        }
+
+        /* The Static Base (Inside Right) */
+        .static-page {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: #fffaf0;
+            border-radius: 12px;
+            z-index: 1;
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.3);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: 30px;
+            text-align: center;
+        }
+
+        /* Decoration */
+        .card-decor {
+            font-size: 3rem;
+            margin: 15px 0;
+        }
+
+        .year-text {
+            font-size: 3.5rem;
+            font-weight: 800;
+            color: #f39c12;
+            font-family: 'Fredoka', sans-serif;
+        }
+
+        .card-title {
+            color: #e74c3c;
+            font-family: 'Fredoka', sans-serif;
+            font-size: 2rem;
+            line-height: 1.1;
+            margin-bottom: 10px;
+        }
+
+        .msg-highlight {
+            color: #e74c3c;
+            font-weight: bold;
+        }
+
+        /* Confetti Canvas */
+        #confetti-canvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 100;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="stars" id="stars"></div>
+    <canvas id="confetti-canvas"></canvas>
+
+    <div class="container">
+
+        <div class="stage active" id="stage1">
+            <h1>A little surprise for you</h1>
+            <p class="subtitle">Before this year begins</p>
+
+            <div class="heart-box pulse-anim" id="heartBtn">
+                <svg class="progress-ring">
+                    <circle class="ring-bg" />
+                    <circle class="ring-fill" id="progressRing" />
+                </svg>
+                <div class="heart-icon"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
+                        <path
+                            d="M11.645 20.91l-.007-.003-.022-.012a15.247 15.247 0 01-.383-.218 25.18 25.18 0 01-4.244-3.17C4.688 15.36 2.25 12.174 2.25 8.25 2.25 5.322 4.714 3 7.688 3A5.5 5.5 0 0112 5.052 5.5 5.5 0 0116.313 3c2.973 0 5.437 2.322 5.437 5.25 0 3.925-2.438 7.111-4.739 9.256a25.175 25.175 0 01-4.244 3.17 15.247 15.247 0 01-.383.219l-.022.012-.007.004-.003.001a.752.752 0 01-.704 0l-.003-.001z" />
+                    </svg></div>
+
+            </div>
+            <div class="instruction">Tap and Hold</div>
+        </div>
+
+        <div class="stage" id="stage2">
+            <div style="margin-bottom: 100px;">
+                <h1>Something is waiting for you</h1>
+            <p class="subtitle">Move the little distractions aside</p>
+            </div>
+            
+
+            <div class="cards-area" id="distractionArea">
+                <div class="gift" id="giftBox">🎁</div>
+
+                <div class="distraction-card c1">
+                    <div class="d-icon">🧠</div>Stress
+                </div>
+                <div class="distraction-card c2">
+                    <div class="d-icon">🌧️</div>Bad Days
+                </div>
+                <div class="distraction-card c3">
+                    <div class="d-icon">💼</div>Work
+                </div>
+                <div class="distraction-card c4">
+                    <div class="d-icon">📍</div>Distance
+                </div>
+            </div>
+        </div>
+
+        <div class="stage" id="stage3">
+            <div class="ticket-wrapper">
+                <div class="golden-ticket">
+                    <div class="t-title">GOLDEN TICKET</div>
+                    <div class="t-sub">Valid for every day ahead</div>
+                    <div class="t-msg">"Unlimited Love & Smiles"</div>
+                    <div class="t-footer">No expiration date</div>
+                </div>
+            </div>
+            <button class="btn-claim" id="claimBtn">CLAIM TICKET ></button>
+        </div>
+
+        <div class="stage" id="stage4">
+            
+                <h1>Some moments from this year</h1>
+                <p class="subtitle">Tap the photo to continue</p>
+            
+            
+
+            <div class="photo-stack" id="photoStack">
+                <div class="polaroid p1">
+                    <img src="10.jpeg"
+                        alt="Memory">
+                </div>
+                <div class="polaroid p2">
+                    <img src="11.jpeg"
+                        alt="Memory">
+                </div>
+                <div class="polaroid p3">
+                    <img src="12.jpeg"
+                        alt="Memory">
+                </div>
+                <div class="tap-hint">Tap photo</div>
+            </div>
+        </div>
+
+        <div class="stage" id="stage5">
+            <h1>For my Cutiepie :)</h1>
+            <p class="subtitle">Tap the card to read</p>
+
+            <div class="book-wrap" id="finalCard">
+                <div class="static-page">
+                    <h2 style="color:#9b59b6; font-family:'Fredoka'; margin-bottom:15px;">Wish you the best!</h2>
+                    <p style="color:#666; font-size:0.9rem; line-height:1.6;">
+                        Happy New Year, my love ❤️ Thank you for being my peace, my smile, and my biggest support. Every moment with you feels special, and I’m so grateful to start another beautiful year holding your hand.
+                        <br><br>
+                        With love,<br><strong>Yours Truly</strong>
+                    </p>
+                    <div style="margin-top:20px; color:#ccc; font-size:0.8rem;">✨ 2026 ✨</div>
+                </div>
+
+                <div class="book-cover">
+                    <div class="front-face">
+                        <div class="card-decor">🎉</div>
+                        <div class="card-title">HAPPY<br>NEW YEAR</div>
+                        <div class="year-text">2026</div>
+                        <div class="card-decor">☃️ 🧸</div>
+                    </div>
+                    <div class="back-face">
+                        <p>Happy New Year, jaan ❤️ Naya saal, nayi yaadein aur ek hi promise—tumhara khayal rakhna aur tumse har din thoda aur zyada pyaar karna.</p>
+                        <p style="margin-top:15px;">No matter what this year holds, I hope you always feel <span
+                                class="msg-highlight">supported, valued, and understood.</span></p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <script>
+        /* --- STARS BACKGROUND --- */
+        const starsContainer = document.getElementById('stars');
+        for (let i = 0; i < 50; i++) {
+            const star = document.createElement('div');
+            star.className = 'star';
+            const size = Math.random() * 2 + 1;
+            star.style.width = size + 'px';
+            star.style.height = size + 'px';
+            star.style.left = Math.random() * 100 + '%';
+            star.style.top = Math.random() * 100 + '%';
+            star.style.setProperty('--duration', (Math.random() * 3 + 2) + 's');
+            star.style.setProperty('--delay', (Math.random() * 5) + 's');
+            star.style.setProperty('--opacity', Math.random() * 0.7 + 0.3);
+            starsContainer.appendChild(star);
+        }
+
+        /* --- STAGE NAVIGATION --- */
+        function nextStage(currentId, nextId) {
+            document.getElementById(currentId).classList.add('hidden');
+            document.getElementById(currentId).classList.remove('active');
+
+            setTimeout(() => {
+                const nextEl = document.getElementById(nextId);
+                nextEl.classList.add('active');
+
+                // Specific logic per stage
+                // if (nextId === 'stage2') setTimeout(scatterCards, 500);
+            }, 600);
+        }
+
+        /* --- STAGE 1: HEART LOGIC --- */
+        const heartBtn = document.getElementById('heartBtn');
+        const progressRing = document.getElementById('progressRing');
+        const circumference = 377; // 2 * pi * 60
+        let holdTimer;
+        let progress = 0;
+        const holdDuration = 1500; // ms
+
+        function startHold(e) {
+            e.preventDefault(); // prevent touch scroll
+            heartBtn.classList.remove('pulse-anim');
+            heartBtn.style.transform = 'scale(0.95)';
+
+            holdTimer = setInterval(() => {
+                progress += 20;
+                const offset = circumference - (progress / holdDuration) * circumference;
+                progressRing.style.strokeDashoffset = offset;
+
+                if (progress >= holdDuration) {
+                    clearInterval(holdTimer);
+                    triggerConfetti();
+                    nextStage('stage1', 'stage2');
+                }
+            }, 20);
+        }
+
+        function endHold() {
+            clearInterval(holdTimer);
+            heartBtn.style.transform = 'scale(1)';
+            if (progress < holdDuration) {
+                progress = 0;
+                progressRing.style.strokeDashoffset = circumference;
+                heartBtn.classList.add('pulse-anim');
+            }
+        }
+
+        heartBtn.addEventListener('mousedown', startHold);
+        heartBtn.addEventListener('touchstart', startHold);
+        heartBtn.addEventListener('mouseup', endHold);
+        heartBtn.addEventListener('mouseleave', endHold);
+        heartBtn.addEventListener('touchend', endHold);
+
+
+        /* --- STAGE 2: DISTRACTIONS --- */
+        // Select all cards
+        const distractionCards = document.querySelectorAll('.distraction-card');
+        const giftBox = document.getElementById('giftBox');
+
+        distractionCards.forEach(card => {
+            card.addEventListener('click', (e) => {
+                e.stopPropagation(); // Stop click from affecting other things
+
+                // Add the 'fly' class to the clicked card
+                card.classList.add('fly');
+
+                // Check if all cards have flown away
+                checkAllCleared();
+            });
+        });
+
+        function checkAllCleared() {
+            // Count how many cards do NOT have the 'fly' class
+            const remaining = document.querySelectorAll('.distraction-card:not(.fly)').length;
+
+            // If no cards remaining, activate the gift box
+            if (remaining === 0) {
+                setTimeout(() => {
+                    giftBox.classList.add('active');
+                }, 300); // Slight delay for smoothness
+            }
+        }
+
+        // Gift Box Click
+        giftBox.addEventListener('click', () => {
+            if (giftBox.classList.contains('active')) {
+                triggerConfetti();
+                nextStage('stage2', 'stage3');
+            }
+        });
+
+        /* --- STAGE 3: CLAIM TICKET --- */
+        document.getElementById('claimBtn').addEventListener('click', () => {
+            nextStage('stage3', 'stage4');
+        });
+
+        /* --- STAGE 4: PHOTOS --- */
+        const photoStack = document.getElementById('photoStack');
+        const photos = photoStack.querySelectorAll('.polaroid');
+        let photoIndex = photos.length - 1; // Start from top
+
+        photoStack.addEventListener('click', () => {
+            if (photoIndex >= 0) {
+                photos[photoIndex].classList.add('fly-off');
+                photoIndex--;
+
+                // When last photo flies off
+                if (photoIndex < 0) {
+                    setTimeout(() => nextStage('stage4', 'stage5'), 800);
+                }
+            }
+        });
+
+        /* --- STAGE 5: FINAL CARD --- */
+        const finalCard = document.getElementById('finalCard');
+        finalCard.addEventListener('click', () => {
+            finalCard.classList.toggle('open');
+            if (finalCard.classList.contains('open')) {
+                setTimeout(triggerConfetti, 300);
+            }
+        });
+
+        /* --- CONFETTI EFFECT --- */
+        const canvas = document.getElementById('confetti-canvas');
+        const ctx = canvas.getContext('2d');
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+
+        let particles = [];
+        const colors = ['#ff66c4', '#f9d56e', '#6eb5f9', '#ffffff'];
+
+        function triggerConfetti() {
+            for (let i = 0; i < 80; i++) {
+                particles.push({
+                    x: window.innerWidth / 2,
+                    y: window.innerHeight / 2,
+                    w: Math.random() * 8 + 4,
+                    h: Math.random() * 8 + 4,
+                    color: colors[Math.floor(Math.random() * colors.length)],
+                    vx: (Math.random() - 0.5) * 15,
+                    vy: (Math.random() - 0.5) * 15 - 5,
+                    grav: 0.4
+                });
+            }
+        }
+
+        function loopConfetti() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            particles.forEach((p, index) => {
+                p.x += p.vx;
+                p.y += p.vy;
+                p.vy += p.grav;
+                p.vx *= 0.96; // drag
+
+                ctx.fillStyle = p.color;
+                ctx.fillRect(p.x, p.y, p.w, p.h);
+
+                if (p.y > window.innerHeight) particles.splice(index, 1);
+            });
+            requestAnimationFrame(loopConfetti);
+        }
+        loopConfetti();
+
+        window.addEventListener('resize', () => {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+        });
+
+    </script>
+</body>
+
+</html>
